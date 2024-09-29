@@ -25,19 +25,21 @@ function init() {
     gl = canvas.getContext("webgl2");
     if (!gl) { alert("Your Web browser doesn't support WebGL 2\nPlease contact Dave"); }
 
-    gl.clearColor(0.6, 0.6, 0.6, 1.0) // Clear the canvas color
+    gl.clearColor(0.7, 0.7, 0.7, 1.0) // Clear the canvas color
 
     // Init objects
     axes = new Axes(gl);
     cone = new Cone(gl, 30);
     cylinder = new Cylinder(gl, 30);
     sphere = new Sphere(gl, 30, 18);
+    tetrahedron = new Tetrahedron(gl);
 
     // (Object, RotateAxis, Translate, Scale)
-    initObjectProperties(axes, [1, 1, 0],[-0.5, 0.5, 0.0], [0.5, 0.5, 0.0])
+    initObjectProperties(axes, [0, 1, 1],[-0.7, 0.7, 0.0], [0.2, 0.2, 0.0])
     initObjectProperties(cone, [1, 1, 0],[0.5, 0.5, 0.0], [0.2, 0.2, 0.0])
-    initObjectProperties(cylinder, [0, 1, 0],[-0.5, -0.4, 0.0], [0.2, 0.3, 0.0])
-    initObjectProperties(sphere, [1, 1, 0],[0.5, -0.5, 0.0], [0.3, 0.3, 0.0])
+    initObjectProperties(cylinder, [0, 1, 0],[-0.7, -0.7, 0.0], [0.2, 0.2, 0.0])
+    initObjectProperties(sphere, [0, 1, 1],[0.5, -0.5, 0.0], [0.3, 0.3, 0.0])
+    initObjectProperties(tetrahedron, [0, 1, 0],[-0.4, 0.1, 0.0], [0.3, 0.3, 0.0])
 
     ms = new MatrixStack() // Init the stack
     
@@ -57,6 +59,7 @@ function render() {
     renderObj(cone, cone.rotateAxis, cone.translate, cone.scale)
     renderObj(cylinder, cylinder.rotateAxis, cylinder.translate, cylinder.scale)
     renderObj(sphere, sphere.rotateAxis, sphere.translate, sphere.scale)
+    renderObj(tetrahedron, tetrahedron.rotateAxis, tetrahedron.translate, tetrahedron.scale)
 
     requestAnimationFrame(render)
 }
