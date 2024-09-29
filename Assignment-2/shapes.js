@@ -31,11 +31,13 @@ function init() {
     axes = new Axes(gl);
     cone = new Cone(gl, 30);
     cylinder = new Cylinder(gl, 30);
+    sphere = new Sphere(gl, 30, 18);
 
     // (Object, RotateAxis, Translate, Scale)
     initObjectProperties(axes, [1, 1, 0],[-0.5, 0.5, 0.0], [0.5, 0.5, 0.0])
     initObjectProperties(cone, [1, 1, 0],[0.5, 0.5, 0.0], [0.2, 0.2, 0.0])
     initObjectProperties(cylinder, [0, 1, 0],[-0.5, -0.4, 0.0], [0.2, 0.3, 0.0])
+    initObjectProperties(sphere, [1, 1, 0],[0.5, -0.5, 0.0], [0.3, 0.3, 0.0])
 
     ms = new MatrixStack() // Init the stack
     
@@ -44,7 +46,7 @@ function init() {
 
 function render() {
     // Clear the canvas
-    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     // increment & mod angle
     angle += 3.0
@@ -54,6 +56,7 @@ function render() {
     renderObj(axes, axes.rotateAxis, axes.translate, axes.scale)
     renderObj(cone, cone.rotateAxis, cone.translate, cone.scale)
     renderObj(cylinder, cylinder.rotateAxis, cylinder.translate, cylinder.scale)
+    renderObj(sphere, sphere.rotateAxis, sphere.translate, sphere.scale)
 
     requestAnimationFrame(render)
 }
