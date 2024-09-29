@@ -10,28 +10,34 @@
 
 // Initialize the WebGL context and Matrix Stack
 let gl = undefined;
-let stack = undefined;
+let ms = undefined;
 
 // Declare objects
 let axes = undefined
 let cone = undefined
 let cylinder = undefined
 
+// Init the angle to rotate
+let angle = 0.0 
+
 function init() {
     let canvas = document.getElementById("webgl-canvas");
     gl = canvas.getContext("webgl2");
     if (!gl) { alert("Your Web browser doesn't support WebGL 2\nPlease contact Dave"); }
 
-    // Setting the background color
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
-
-    // Initialization the stack
-    stack = new MatrixStack()
+    gl.clearColor(0.2, 0.2, 0.2, 1.0) // Clear the canvas color
 
     // Init objects
     axes = new Axes(gl);
-    cone = new Cone(gl, 30) // Pass 30 numOfSlices for perimeter
-    cylinder = new Cylinder(gl, 30) // Pass 30 numOfSlices for perimeter
+    cone = new Cone(gl, 30);
+    cylinder = new Cylinder(gl, 30);
+
+    // Object, RotateAxis, Translate, Scale
+    initObjectProperties(axes, [1, 1, 0],[-0.5, 0.5, 0.0], [0.5, 0.5, 0.0])
+    initObjectProperties(cone, [1, 1, 0],[0.5, 0.5, 0.0], [0.2, 0.2, 0.0])
+    initObjectProperties(cylinder, [0, 1, 0],[-0.5, -0.4, 0.0], [0.2, 0.3, 0.0])
+
+    ms = new MatrixStack() // Init the stack
 
     // Render the axes
     render()
@@ -39,50 +45,35 @@ function init() {
 
 function render() {
     // Clear the canvas
-    gl.clear(gl.COLOR_BUFFER_BIT || gl.DEPTH_BUFFER_BIT)
+    gl.clear(gl.COLOR_BUFFER_BIT)
 
-    // Load the identity matric to reset transforms
-    stack.loadIdentity()
+    // increment & mod angle
+    angle += 3.0
+    angle %= 360.0
 
-    // Push the identity matrix onto the top of the stack
-    stack.push()
-    stack.translate(0.0, 0.0, 0.0); // Move cone to the right
-    stack.scale(0.5, 0.5, 0.0)  // Scale the axes
+    // Render the objects passing their props
+    renderObj(axes, axes.rotateAxis, axes.translate, axes.scale)
+    renderObj(cone, cone.rotateAxis, cone.translate, cone.scale)
+    renderObj(cylinder, cylinder.rotateAxis, cylinder.translate, cylinder.scale)
 
-    // Pass the transformation matrix to the axes shader
-    axes.MV = stack.current()
-    axes.draw() // Draw the axes
-    
-    // Pop the axes off the Matrix stack
-    stack.pop()
-
-    // Push the identity matrix onto the top of the stack
-    stack.push()
-    stack.translate(0.5, 0.0, 0.0); // Move cone to the right
-    stack.scale(0.2, 0.2, 0.0) // Scale the cone
-
-    // Pass the transformation matrix to the cone shader
-    cone.MV = stack.current()
-    cone.draw() // Draw the cone
-
-    // Pop the cone off the Matrix stack
-    stack.pop()
-
-    // Push the identity matrix onto the top of the stack
-    stack.push()
-    stack.translate(0.1, 0.7, 0.0); // Move cylinder to the right
-    stack.scale(0.2, 0.2, 0.0) // Scale the cylinder
-
-    // Pass the transformation matrix to the cylinder shader
-    cylinder.MV = stack.current()
-    cylinder.draw() // Draw the cylinder
-
-    // Pop the cylinder off the Matrix stack
-    stack.pop()
-
-    // Get the next frame to continously render the objects
     requestAnimationFrame(render)
 }
 
-window.onload = init;
+function renderObj(obj, rotateAxis, translate, scale) {
+    ms.push()
+    ms.translate(translate)
+    ms.scale(scale)
+    ms.rotate(angle, rotateAxis)
+    obj.MV = ms.current()
+    obj.draw() 
+    ms.pop()
+}
 
+// Adding props on each obj, I want to mutate original instead of using spread...
+function initObjectProperties(obj, rotateAxis, translate, scale) {
+    obj.rotateAxis = rotateAxis
+    obj.translate = translate
+    obj.scale = scale
+}
+
+window.onload = init;
