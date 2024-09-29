@@ -25,7 +25,7 @@ function init() {
     gl = canvas.getContext("webgl2");
     if (!gl) { alert("Your Web browser doesn't support WebGL 2\nPlease contact Dave"); }
 
-    gl.clearColor(0.2, 0.2, 0.2, 1.0) // Clear the canvas color
+    gl.clearColor(0.6, 0.6, 0.6, 1.0) // Clear the canvas color
 
     // Init objects
     axes = new Axes(gl);

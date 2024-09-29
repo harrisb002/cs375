@@ -18,6 +18,9 @@ class Sphere {
             uniform mat4 P;  // Projection transformation
             uniform mat4 MV; // Model-view transformation
 
+            // Using to pass the color to the fragment shader
+            out vec4 vColor;
+
             void main() {
                 float iid = float(gl_InstanceID);
                 vec4  v;  // our generated vertex
@@ -40,17 +43,30 @@ class Sphere {
                 }   
                 v.w = 1.0;
 
+
+                // Set color to red .2 and blue 0.5
+                // Green alternating between 0 and 1 based on even/odd vertices.
+                vColor = vec4(
+                    0.2,
+                    .9,  
+                    0.7,
+                    .7                           
+                );
+                
                 gl_Position = P * MV * v;
             }
         `;
 
         fragmentShader ||= `
-            uniform vec4 color;
+            // uniform vec4 color;
+            
+            // Taking in color vect
+            in vec4 vColor;
             out vec4 fColor;
 
             void main() {
-                fColor = color;
-            }
+                // Using color passed in from the vertex shader
+                fColor = vColor;            }
         `;
 
         let program = initShaders(gl, vertexShader, fragmentShader);
@@ -92,7 +108,7 @@ class Sphere {
             program.P();
             program.color();
 
-            gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 
+            gl.drawArraysInstanced(gl.LINES, 0, 
                 2*(numSlices + 1), numStrips);
 
             gl.useProgram(null);
