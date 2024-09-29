@@ -32,7 +32,7 @@ function init() {
     cone = new Cone(gl, 30);
     cylinder = new Cylinder(gl, 30);
 
-    // Object, RotateAxis, Translate, Scale
+    // (Object, RotateAxis, Translate, Scale)
     initObjectProperties(axes, [1, 1, 0],[-0.5, 0.5, 0.0], [0.5, 0.5, 0.0])
     initObjectProperties(cone, [1, 1, 0],[0.5, 0.5, 0.0], [0.2, 0.2, 0.0])
     initObjectProperties(cylinder, [0, 1, 0],[-0.5, -0.4, 0.0], [0.2, 0.3, 0.0])

@@ -44,8 +44,10 @@ class Cone {
                     float angle = dir * vid * 2.0 * Pi / float(numSides);
                     v = vec4(cos(angle), sin(angle), 0.0, 1.0);
 
-                    // Assign red (1.0, 0.0, 0.0) to the base and violet (0.5, 0.0, 0.5) to the surface.
-                    // Useing gl_InstanceID == 0 for base and gl_InstanceID == 1 for surface.
+                    // Red: if gl_InstanceID == 0 then make it full red else half red.
+                    // Green: 0.0 no green.
+                    // Blue: if gl_InstanceID == 0 then make it no blue else half blue.
+                    // Alpha: 1.0 fully opaque.
                     vColor = vec4(gl_InstanceID == 0 ? 1.0 : 0.5, 0.0, gl_InstanceID == 0 ? 0.0 : 0.5, 1.0);
                 }
 

@@ -17,6 +17,9 @@ class Cylinder {
 
             uniform mat4 P;  // Projection transformation
             uniform mat4 MV; // Model-view transformation
+            
+            // Using to pass the color to the fragment shader
+            out vec4 vColor;
 
             void main() {
                 float iid = float(gl_InstanceID);
@@ -34,16 +37,29 @@ class Cylinder {
 
                 v.zw = vec2(float(gl_VertexID / 3), 1.0);
 
+                // Set color to a constant red (.4) with no green
+                // Blue alternating between 0 and 1 based on even/odd vertices.
+                vColor = vec4(
+                    0.4,
+                    0.0,
+                    float(gl_VertexID % 2 == 0),  
+                    1.0                           
+                );
+
                 gl_Position = P * MV * v;
             }
         `;
 
         fragmentShader ||= `
-            uniform vec4 color;
+            // uniform vec4 color;
+
+            // Taking in color vect
+            in vec4 vColor;
+
             out vec4 fColor;
 
             void main() {
-                fColor = color;
+                fColor = vColor;
             }
         `;
 
