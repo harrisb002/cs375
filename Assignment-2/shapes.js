@@ -20,6 +20,9 @@ let cylinder = undefined
 // Init the angle to rotate
 let angle = 0.0 
 
+// init scale factor for dynamically scalling
+let scaleFactor = 1.0; 
+
 function init() {
     let canvas = document.getElementById("webgl-canvas");
     gl = canvas.getContext("webgl2");
@@ -53,6 +56,12 @@ function render() {
     // increment & mod angle
     angle += 3.0
     angle %= 360.0
+
+    // Change scale based on sine wave to oscilate and angle
+    scaleFactor = 0.5 * Math.sin(angle * Math.PI / 360);
+
+    // Using dynamic scale on tetrahedron
+    tetrahedron.scale = [scaleFactor, scaleFactor, scaleFactor]
 
     // Render the objects passing their props
     renderObj(axes, axes.rotateAxis, axes.translate, axes.scale)
