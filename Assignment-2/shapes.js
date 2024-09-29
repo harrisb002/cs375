@@ -38,8 +38,7 @@ function init() {
     initObjectProperties(cylinder, [0, 1, 0],[-0.5, -0.4, 0.0], [0.2, 0.3, 0.0])
 
     ms = new MatrixStack() // Init the stack
-
-    // Render the axes
+    
     render()
 }
 

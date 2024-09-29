@@ -15,9 +15,11 @@ class Cone {
 
         vertexShader ||= `
             uniform int  numSides; // number of slices around the perimeter
-
             uniform mat4 P;  // Projection transformation
             uniform mat4 MV; // Model-view transformation
+
+            // Using to pass the color to the fragment shader
+            out vec4 vColor;
 
             void main() {
                 vec4  v;  // our generated vertex
@@ -27,6 +29,10 @@ class Cone {
                 if (gl_VertexID == 0) {
                     float iid = float(gl_InstanceID);
                     v = vec4(0.0, 0.0, iid, 1.0);
+
+                    // Create a gradient from red (1.0, 0.0, 0.0) at base to violet (0.5, 0.0, 0.5) at apex.
+                    // Red dec. and blue inc. as iid (the instance ID) goes from 0 (the base) to 1 (the apex).
+                    vColor = vec4(1.0 - 0.5 * iid, 0.0, 0.5 * iid, 1.0); 
                 }
                 else {
                     // Since vertex ID zero is reserved for the center vertex
@@ -37,6 +43,10 @@ class Cone {
                     float dir = gl_InstanceID == 0 ? 1.0 : -1.0;
                     float angle = dir * vid * 2.0 * Pi / float(numSides);
                     v = vec4(cos(angle), sin(angle), 0.0, 1.0);
+
+                    // Assign red (1.0, 0.0, 0.0) to the base and violet (0.5, 0.0, 0.5) to the surface.
+                    // Useing gl_InstanceID == 0 for base and gl_InstanceID == 1 for surface.
+                    vColor = vec4(gl_InstanceID == 0 ? 1.0 : 0.5, 0.0, gl_InstanceID == 0 ? 0.0 : 0.5, 1.0);
                 }
 
                 gl_Position = P * MV * v;
@@ -44,11 +54,15 @@ class Cone {
         `;
 
         fragmentShader ||= `
-            uniform vec4 color;
+            // uniform vec4 color;
+
+            // Taking in color vect
+            in vec4 vColor;
             out vec4 fColor;
 
             void main() {
-                fColor = color;
+                // Using color passed in from the vertex shader
+                fColor = vColor;
             }
         `;
 
@@ -88,9 +102,10 @@ class Cone {
 
             program.MV();
             program.P();
+
             program.color();
 
-            gl.drawArraysInstanced(gl.TRIANGLE_FAN, 0, numSides + 2, 2);
+            gl.drawArraysInstanced(gl.TRIANGLE_FAN, 0, numSides + 2, 3);
 
             gl.useProgram(null);
         };
