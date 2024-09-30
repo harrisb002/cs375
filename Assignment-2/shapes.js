@@ -2,9 +2,9 @@
 //
 //  shapes.js
 //
-//  Create and render three objects (for not trying axes, cone, and cylinder) 
-//  in a WebGL context. Objects are positioned using the MatrixStack to 
-//  make sure they do not intersect and are within the canvas bounds. 
+//  Creates and renders five objects (axes, cone, cylinder, sphere, and tetrahedron)
+//  using a WebGL context. Objects are positioned using the MatrixStack 
+//  to make sure they do not intersect and are within the bounds of the canvas.
 //
 /////////////////////////////////////////////////////////////////////////////
 
