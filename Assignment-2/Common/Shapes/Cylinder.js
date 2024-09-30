@@ -51,8 +51,6 @@ class Cylinder {
         `;
 
         fragmentShader ||= `
-            // uniform vec4 color;
-
             // Taking in color vect
             in vec4 vColor;
 

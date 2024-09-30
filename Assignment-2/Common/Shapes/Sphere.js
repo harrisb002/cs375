@@ -57,9 +57,7 @@ class Sphere {
             }
         `;
 
-        fragmentShader ||= `
-            // uniform vec4 color;
-            
+        fragmentShader ||= `            
             // Taking in color vect
             in vec4 vColor;
             out vec4 fColor;

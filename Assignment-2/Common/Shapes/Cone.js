@@ -56,8 +56,6 @@ class Cone {
         `;
 
         fragmentShader ||= `
-            // uniform vec4 color;
-
             // Taking in color vect
             in vec4 vColor;
             out vec4 fColor;
