@@ -23,12 +23,15 @@ let angle = 0.0
 // init scale factor for dynamically scalling
 let scaleFactor = 1.0; 
 
+// Create array to store shapes
+let objects = []
+
 function init() {
     let canvas = document.getElementById("webgl-canvas");
     gl = canvas.getContext("webgl2");
     if (!gl) { alert("Your Web browser doesn't support WebGL 2\nPlease contact Dave"); }
 
-    gl.clearColor(0.7, 0.7, 0.7, 1.0) // Clear the canvas color
+    gl.clearColor(0.7, 0.7, 0.7, 1.0) // Clear the canvas color to slightly grey
 
     // Init objects
     axes = new Axes(gl);
@@ -44,7 +47,11 @@ function init() {
     initObjectProperties(sphere, [0, 1, 1],[0.5, -0.5, 0.0], [0.3, 0.3, 0.0])
     initObjectProperties(tetrahedron, [0, 1, 0],[-0.4, 0.1, 0.0], [0.3, 0.3, 0.0])
 
-    ms = new MatrixStack() // Init the stack
+    // Store all shapes in the objects array
+    objects.push(axes, cone, cylinder, sphere, tetrahedron)
+
+    // Init the stack
+    ms = new MatrixStack() 
     
     render()
 }
@@ -64,16 +71,14 @@ function render() {
     tetrahedron.scale = [scaleFactor, scaleFactor, scaleFactor]
 
     // Render the objects passing their props
-    renderObj(axes, axes.rotateAxis, axes.translate, axes.scale)
-    renderObj(cone, cone.rotateAxis, cone.translate, cone.scale)
-    renderObj(cylinder, cylinder.rotateAxis, cylinder.translate, cylinder.scale)
-    renderObj(sphere, sphere.rotateAxis, sphere.translate, sphere.scale)
-    renderObj(tetrahedron, tetrahedron.rotateAxis, tetrahedron.translate, tetrahedron.scale)
+    objects.forEach((obj) => {
+        renderObject(obj, obj.rotateAxis, obj.translate, obj.scale)
+    })
 
     requestAnimationFrame(render)
 }
 
-function renderObj(obj, rotateAxis, translate, scale) {
+function renderObject(obj, rotateAxis, translate, scale) {
     ms.push()
     ms.translate(translate)
     ms.scale(scale)
