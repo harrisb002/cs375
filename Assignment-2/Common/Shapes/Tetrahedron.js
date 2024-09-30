@@ -14,13 +14,23 @@ class Tetrahedron {
             uniform mat4 P;  // Projection transformation
             uniform mat4 MV; // Model-view transformation
 
-
+            // Using to pass the color to the fragment shader
+            out vec4 vColor;
+            
             void main() {
                 const vec3 vertices[] = vec3[4](
                     vec3(0, 0, 1),
                     vec3(0.9428, 0, -0.3333),
                     vec3(-0.4714, 0.8164, -0.3333),
                     vec3(-0.4714, -0.8164, -0.3333)
+                );
+
+                // Defining (R, G, B, Y) colors respectively, in an array to interpolate onto the shape
+                const vec4 colors[] = vec4[4](
+                    vec4(1.0, 0.0, 0.0, 1.0), 
+                    vec4(0.0, 1.0, 0.0, 1.0), 
+                    vec4(0.0, 0.0, 1.0, 1.0), 
+                    vec4(1.0, 1.0, 0.0, 1.0)  
                 );
 
                 const ivec3 indices[] = ivec3[4](
@@ -31,16 +41,24 @@ class Tetrahedron {
                 );
 
                 vec4 v = vec4(vertices[indices[gl_InstanceID][gl_VertexID]], 1.0);
+
+                // Finding current triangle's vertex using indices[gl_InstanceID][gl_VertexID].
+                // Getting color for vertex from the colors array defined above.
+                vColor = colors[indices[gl_InstanceID][gl_VertexID]];
+
                 gl_Position = P * MV * v;
             }
         `;
 
         fragmentShader ||= `
             uniform vec4 color;
+
+            // Taking in color vect
+            in vec4  vColor;
             out vec4 fColor;
 
             void main() {
-                fColor = color;
+                fColor = vColor;
             }
         `;
 
