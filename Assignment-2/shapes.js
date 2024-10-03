@@ -90,13 +90,16 @@ function render() {
   requestAnimationFrame(render);
 }
 
-function renderObject(obj, rotateAxis, translate, scale, newColor = color) {
+function renderObject(obj, rotateAxis, translate, scale) {
   ms.push();
   ms.translate(translate);
   ms.scale(scale);
   ms.rotate(angle, rotateAxis);
-  obj.color = newColor;
   obj.MV = ms.current();
+  // Update color for objects that have color uniforms (Only sphere)
+  if (obj.color) {
+    obj.color = color;
+  }
   obj.draw();
   ms.pop();
 }
