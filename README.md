@@ -72,9 +72,7 @@
 - I have implemented the rendering loop in the `render()` function.
 - This loop clears the canvas, draws all objects, and request the next animation frame.
 
-## ⚙️ **Assignment-3: Matrix Stacks**
-
-### ✅ Assignment 3: Cube Rendering Techniques
+## ⚙️ Assignment 3: Modeling : Cubes Three Ways!
 
 **Overview**  
 This project demonstrates various 3D modeling techniques by implementing three different approaches to render a cube using WebGL. The assignment's objective is to create three JavaScript classes, each rendering a cube with unique methods to illustrate efficiency and creativity in rendering techniques.
