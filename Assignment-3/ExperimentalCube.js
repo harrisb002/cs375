@@ -33,9 +33,12 @@ class ExperimentalCube {
                     vec4(0.2, 0.3, 4, 1.0)      // Grayish-Blue for left face
                 );
 
-                
-                
+                // Apply transformation for each face
                 vec4 v = instanceMatrices[gl_InstanceID] * vertices[gl_VertexID];
+                
+                // Translate cube to center around origin
+                v.xyz -= vec3(0.5, 0.5, 0.5);
+                
                 gl_Position = P * MV * v;
                 vColor = colors[gl_InstanceID];
             }
