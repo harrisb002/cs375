@@ -72,7 +72,7 @@
 - I have implemented the rendering loop in the `render()` function.
 - This loop clears the canvas, draws all objects, and request the next animation frame.
 
-## ⚙️ Assignment 3: Modeling : Cubes Three Ways!
+## ✅ Assignment 3: Modeling : Cubes Three Ways!
 
 **Overview**  
 This project demonstrates various 3D modeling techniques by implementing three different approaches to render a cube using WebGL. The assignment's objective is to create three JavaScript classes, each rendering a cube with unique methods to illustrate efficiency and creativity in rendering techniques.
@@ -148,3 +148,21 @@ This project demonstrates various 3D modeling techniques by implementing three d
    Each cube class initializes a shader program for rendering, allowing for custom vertex and fragment shaders.
 
 ---
+
+1. _BasicCube.js_
+
+- Manual Vertex Definition: Defined all 36 vertices (12 triangles \* 3 vertices) manually, with each face consisting of two triangles, and assigned unique colors to each vertex for visual clarity.
+- Centering: Centered the cube around the origin in the vertex shader by adjusting positions `(v.xyz -= 0.5)`
+- Rendering: Rendered the cube using `gl.drawArrays(gl.TRIANGLES, 0, 36)`
+
+2. _IndexedCube.js_
+
+- Efficient Vertex Reuse: Defined 8 unique vertices for the cube's corners and created an index array to reference these vertices for rendering the 12 triangles, reducing redundant data.
+- Centering & Coloring: Assigned colors to each vertex and centered the cube around the origin in the vertex shader same as before.
+- Rendering: Rendered the cube using `gl.drawElements(gl.TRIANGLES, indexBuffer.count, indexBuffer.type, 0)`, reusing vertices.
+
+3. _ExperimentalCube.js_
+
+- Instanced Rendering: Defined 4 vertices for a single face and used `gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 6)` to render 6 instances, one for each face of the cube!
+- Shader-Based Transformations: In the vertex shader I used `gl_InstanceID` to apply transformation matrices (instanceMatrices) and assign colors from an array.
+- Efficiency: Efficient rendering by minimizing vertex data and minimizing data sent from CPU to GPU by leveraging instanced rendering and shader capabilities, ensured front-facing traingles using `gl_FrontFacing`.
