@@ -2,113 +2,73 @@ class ExperimentalCube {
     constructor(gl, vertexShader, fragmentShader) {
         vertexShader ||= `
             in vec4 aPosition;
-            in vec4 aColor;
-
             uniform mat4 P;
             uniform mat4 MV;
-
             out vec4 vColor;
 
             void main() {
-                vec4 v = aPosition;
-                v.xyz -= 0.5; // Center cube around orgin by shifting each axis by -0.5
-                gl_Position = P * MV * v;
-                vColor = aColor;
-             }
-        `;
-        fragmentShader = `
-        in vec4 vColor;
-        out vec4 fColor;
+                vec4 vertices[] = vec4[]( // Defining the face vertices in normalized space
+                    vec4(0.0, 0.0, 1.0, 1.0),
+                    vec4(1.0, 0.0, 1.0, 1.0),
+                    vec4(0.0, 1.0, 1.0, 1.0),
+                    vec4(1.0, 1.0, 1.0, 1.0)
+                );
 
-        void main() {
-            fColor = vColor; // Render all faces with the same color regardless of orientation.
+                // This took me forever... bulk of the work here
+                mat4 instanceMatrices[6] = mat4[](
+                    mat4(1, 0, 0, 0,   0, 1, 0, 0,   0, 0, 1, 0,    0, 0, 0, 1),     // Front
+                    mat4(-1, 0, 0, 0,  0, 1, 0, 0,   0, 0, 01, 0,   1, 0, -1, 1),    // Back
+                    mat4(1, 0, 0, 0,   0, 0, 1, 0,   0, 0, 0, 0,    0, 0, 0, 1),     // Top
+                    mat4(1, 0, 0, 0,   0, 0, 1, 0,   0, 1, 0, 0,    0, 0, 0, 1),     // Bottom
+                    mat4(0, 0, 1, 0,   0, 1, 0, 0,   0, 0, 0, 0,    0, 0, 0, 1),     // Right
+                    mat4(0, 0, -1, 0,  0, -1, 0, 0,  1, 1, 1, 0,    0, 0, 0, 1)      // Left
+                );
+
+                vec4 colors[6] = vec4[](
+                    vec4(0.0, 1.0, 0.0, 1.0),   // Green for front face
+                    vec4(1.0, 0.0, 0.0, 1.0),   // Red for back face
+                    vec4(1.0, 0.0, 1.0, 1.0),   // Magenta for top face
+                    vec4(0.0, 1.0, 1.0, 1.0),   // Cyan for bottom face
+                    vec4(1.0, 1.0, 0.0, 1.0),   // Yellow for right face
+                    vec4(0.2, 0.3, 4, 1.0)      // Grayish-Blue for left face
+                );
+
+                
+                
+                vec4 v = instanceMatrices[gl_InstanceID] * vertices[gl_VertexID];
+                gl_Position = P * MV * v;
+                vColor = colors[gl_InstanceID];
             }
         `;
 
+        fragmentShader = `
+            in vec4 vColor;
+            out vec4 fColor;
+
+            void main() {
+                fColor = vColor;
+            }
+        `;
+
+        // Only defining 4 points for the cube! Pretty cool if ya ask me lol
         const positions = new Float32Array([
-            // Front face
-            0, 0, 1, 1, 0, 1, 1, 1, 1,
-            0, 0, 1, 1, 1, 1, 0, 1, 1,
-            // Back face
-            0, 0, 0, 0, 1, 0, 1, 1, 0,
-            0, 0, 0, 1, 1, 0, 1, 0, 0,
-            // Top face
-            0, 1, 0, 0, 1, 1, 1, 1, 1,
-            0, 1, 0, 1, 1, 1, 1, 1, 0,
-            // Bottom face
-            0, 0, 0, 1, 0, 0, 1, 0, 1,
-            0, 0, 0, 1, 0, 1, 0, 0, 1,
-            // Right face
-            1, 0, 0, 1, 1, 0, 1, 1, 1,
-            1, 0, 0, 1, 1, 1, 1, 0, 1,
-            // Left face
-            0, 0, 0, 0, 0, 1, 0, 1, 1,
-            0, 0, 0, 0, 1, 1, 0, 1, 0
+            0, 0, 1,
+            1, 0, 1,
+            0, 1, 1,
+            1, 1, 1
         ]);
 
-        const colors = new Float32Array([
-            // Triangle 1&2, Front face (Green)
-            0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,
-            0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,
-            // Triangle 3&4, Back face (Red)
-            1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0,
-            1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0,
-            // Triangle 5&6, Top face (Magenta)
-            1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0,
-            // Triangle 7&8, Bottom face (Cyan)
-            0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0,
-            0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0,
-            // Triangle 9&10, Right face (Yellow)
-            1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-            1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-            // Triangle 11&12, Left face (Blue)
-            0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0,
-            0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0
-        ]);
-
-        // Shader program initialization
         const program = new ShaderProgram(gl, this, vertexShader, fragmentShader);
-
-        // Init position and color attributes using the Attribute helper class
         let aPosition = new Attribute(gl, program, "aPosition", positions, 3, gl.FLOAT);
-        let aColor = new Attribute(gl, program, "aColor", colors, 4, gl.FLOAT);
 
-        // Init instance attribute 
-        let aInstance = gl.getAttribLocation(program.program, 'aInstance');
-        // Create buffer to send instance data to gpu
-        let buffer = gl.createBuffer();
-
-        // Using Uniform buffer for instance model matrices
-        gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-        gl.bufferData(gl.UNIFORM_BUFFER, [], gl.STATIC_DRAW);
-
-        // Draw function using instanced rendering
         this.draw = () => {
-            // Using the shader program
             program.use();
-
-            // Bind and enable attributes
             aPosition.enable();
-            aColor.enable();
 
-            // Bind and enable Instance attribute
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            // numComponents = 10 for num of instances, rest is default
-            gl.vertexAttribPointer(aInstance, 10, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(aInstance);
-
-            // Draw 10 triangles using TRIANGLE_STRIP (just rendering a single instance, i.e. the 1 as last param)
-            // (starting index for vertex attr, num of vertices to use per inst., num inst. to draw)
-            gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 36, 1);
+            // Drawing a TRIANGLE_STRIP with 4 vertices, instanced 6 times for each cube face
+            gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 6);
 
             aPosition.disable();
-            aColor.disable();
-
-            // unbind and disable Instance attribute
-            gl.disableVertexAttribArray(aInstance);
-            gl.bindBuffer(gl.UNIFORM_BUFFER, null);
         };
-
     }
 }
