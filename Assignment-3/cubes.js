@@ -36,28 +36,28 @@ function init() {
     }
 
     let ms = new MatrixStack;
-    ms.translate(0.0, 0.0, -0.5*(near + far));
+    ms.translate(0.0, 0.0, -0.5 * (near + far));
 
     let angle = 0.0;
 
     let render = () => {
 
         let views = [
-            { 
-                vp : [  20, 340, 300, 300 ],
-                cc : [ 1, 0, 0, 1 ],
+            {
+                vp: [20, 340, 300, 300],
+                cc: [1, 0, 0, 1],
             },
-            { 
-                vp : [ 340, 340, 300, 300 ],
-                cc : [ 0, 1, 0, 1 ],
+            {
+                vp: [340, 340, 300, 300],
+                cc: [0, 1, 0, 1],
             },
-            { 
-                vp : [ 180,  20, 300, 300 ],
-                cc : [ 0, 0, 1, 1 ],
+            {
+                vp: [180, 20, 300, 300],
+                cc: [0, 0, 1, 1],
             },
         ];
 
-        angle += 3.0;
+        angle += 2.0;
         angle %= 360.0;
 
         ms.push();
@@ -68,7 +68,7 @@ function init() {
             gl.viewport(...v.vp);
             gl.scissor(...v.vp);
             gl.clearColor(...v.cc);
-            gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             cubes[i].MV = ms.current();
             cubes[i].draw();

@@ -17,20 +17,20 @@ class ExperimentalCube {
                 // This took me forever... bulk of the work here
                 mat4 instanceMatrices[6] = mat4[](
                     mat4(1, 0, 0, 0,   0, 1, 0, 0,   0, 0, 1, 0,    0, 0, 0, 1),     // Front
-                    mat4(-1, 0, 0, 0,  0, 1, 0, 0,   0, 0, 01, 0,   1, 0, -1, 1),    // Back
+                    mat4(-1, 0, 0, 0,  0, 1, 0, 0,   0, 0, 0, 0,    1, 0, 0, 1),     // Back
                     mat4(1, 0, 0, 0,   0, 0, 1, 0,   0, 0, 0, 0,    0, 0, 0, 1),     // Top
-                    mat4(1, 0, 0, 0,   0, 0, 1, 0,   0, 1, 0, 0,    0, 0, 0, 1),     // Bottom
+                    mat4(1, 0, 0, 0,   0, 0, -1, 0,   0, 1, 1, 0,   0, 0, 0, 1),     // Bottom 
                     mat4(0, 0, 1, 0,   0, 1, 0, 0,   0, 0, 0, 0,    0, 0, 0, 1),     // Right
-                    mat4(0, 0, -1, 0,  0, -1, 0, 0,  1, 1, 1, 0,    0, 0, 0, 1)      // Left
+                    mat4(0, 0, -1, 0,  0, 1, 0, 0,   1, 0, 0, 0,    0, 0, 1, 1)      // Left
                 );
 
                 vec4 colors[6] = vec4[](
-                    vec4(0.0, 1.0, 0.0, 1.0),   // Green for front face
-                    vec4(1.0, 0.0, 0.0, 1.0),   // Red for back face
-                    vec4(1.0, 0.0, 1.0, 1.0),   // Magenta for top face
+                    vec4(0.0, 1.0, 0.0, 1.0),   // Green for front face //
+                    vec4(1.0, 0.0, 0.0, 1.0),   // Red for back face //
+                    vec4(1.0, 0.0, 1.0, 1.0),   // Magenta for top face //
                     vec4(0.0, 1.0, 1.0, 1.0),   // Cyan for bottom face
-                    vec4(1.0, 1.0, 0.0, 1.0),   // Yellow for right face
-                    vec4(0.2, 0.3, 4, 1.0)      // Grayish-Blue for left face
+                    vec4(1.0, 1.0, 0.0, 1.0),   // Yellow for right face //
+                    vec4(0.2, 0.3, 4, 1.0)      // Grayish-Blue for left face //
                 );
 
                 // Apply transformation for each face
@@ -43,17 +43,17 @@ class ExperimentalCube {
                 vColor = colors[gl_InstanceID];
             }
         `;
-
         fragmentShader = `
             in vec4 vColor;
             out vec4 fColor;
 
             void main() {
-                fColor = vColor;
+                // Testing for front facing traingles by making those not, black
+                fColor = gl_FrontFacing? vColor : vec4(0,0,0,1); 
             }
         `;
 
-        // Only defining 4 points for the cube! Pretty cool if ya ask me lol
+        // Only defining 4 verticies explicitly for the cube! Pretty cool if ya ask me lol
         const positions = new Float32Array([
             0, 0, 1,
             1, 0, 1,
