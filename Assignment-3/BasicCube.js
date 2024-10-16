@@ -23,7 +23,6 @@ class BasicCube {
                 vColor = aColor;
              }
         `;
-
         fragmentShader = `
         in vec4 vColor;
         out vec4 fColor;
