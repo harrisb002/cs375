@@ -11,7 +11,7 @@
     "three": "^0.171.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "get": "node ./get.js",
