@@ -7,8 +7,8 @@ const containerStyle = {
 };
 
 const defaultCenter = {
-    lat: -33.9249, // Latitude for Cape Town
-    lng: 18.4241,  // Longitude for Cape Town
+    lat: -33.9249,
+    lng: 18.4241,
 };
 
 const calculateCentroid = (coordinates) => {
@@ -34,14 +34,17 @@ export default function MapContainer({ selectedCategory }) {
     useEffect(() => {
         const fetchPolygons = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/kml`); // Correct endpoint
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/polygons`);
                 if (!response.ok) throw new Error('Failed to fetch polygons');
                 const data = await response.json();
 
-                const centroids = data.map(polygon => ({
-                    position: calculateCentroid(polygon.coordinates),
-                    label: polygon.Label,
-                }));
+                const centroids = data.map(polygon => {
+                    return {
+                        position: calculateCentroid(polygon.coordinates),
+                        groundTruthLabel: polygon.ground_truth_label,
+                        predictedLabel: polygon.predicted_label_name
+                    };
+                });
 
                 setMarkers(centroids);
             } catch (error) {
@@ -53,7 +56,7 @@ export default function MapContainer({ selectedCategory }) {
     }, []);
 
     const filteredMarkers = selectedCategory
-        ? markers.filter(marker => marker.label === selectedCategory)
+        ? markers.filter(marker => marker.groundTruthLabel === selectedCategory)
         : markers;
 
     return (
@@ -73,8 +76,10 @@ export default function MapContainer({ selectedCategory }) {
                         onCloseClick={() => setSelectedMarker(null)}
                     >
                         <div>
-                            <h3>Category</h3>
-                            <p>{selectedMarker.label}</p>
+                            <h3>Ground Truth Label</h3>
+                            <p>{selectedMarker.groundTruthLabel}</p>
+                            <h3>Predicted Label</h3>
+                            <p>{selectedMarker.predictedLabel}</p>
                         </div>
                     </InfoWindow>
                 )}

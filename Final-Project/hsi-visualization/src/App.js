@@ -11,12 +11,12 @@ function App() {
   useEffect(() => {
     const categoryList = [
       "Built-up",
-      "Consolidated Barren (rocks, salt pans)",
+      "Consolidated Barren",
       "Shrubs and Natural Grassland",
       "Natural Wooded Land",
-      "Permanent Crops (e.g., vineyard)",
+      "Permanent Crops",
       "Planted Forest",
-      "Annual Crops (e.g wheat)",
+      "Annual Crops",
       "Unconsolidated Barren",
       "Waterbodies"
     ];
