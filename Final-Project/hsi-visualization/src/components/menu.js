@@ -6,7 +6,7 @@ export const menu = () => {
     let labelText;
     let options;
     let onChange;
-    let multiSelect = false; // Default is single-select
+    let multiSelect = false; 
 
     const my = (selection) => {
         const container = selection.append('div').attr('id', id);
@@ -17,7 +17,7 @@ export const menu = () => {
 
         const selectEl = container.append('select')
             .attr('id', id + '-select')
-            .attr('multiple', multiSelect) // Add multi-select attribute if enabled
+            .attr('multiple', multiSelect) 
             .on('change', function () {
                 const selectedValues = Array.from(this.selectedOptions).map(opt => opt.value);
                 onChange(selectedValues);

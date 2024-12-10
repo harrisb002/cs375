@@ -16,7 +16,7 @@ export function useData() {
             .then(polyData => {
                 setPolygons(polyData);
 
-                // Extract unique categories from ground_truth_label
+                // Get the unique categories from ground_truth_label
                 const uniqueCategories = [...new Set(polyData.map(item => item.ground_truth_label))].filter(Boolean);
                 setCategories(uniqueCategories);
             })

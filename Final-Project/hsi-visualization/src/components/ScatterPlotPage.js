@@ -1,4 +1,3 @@
-// ScatterPlotPage.js
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { scatterPlot } from './scatterPlot';
@@ -38,18 +37,15 @@ function ScatterPlotPage({ selectedMarkers }) {
         return [];
     }, [data]);
 
-    // Build menus once data and frequency fields are ready
     useEffect(() => {
         if (data.length === 0 || frequencyFields.length === 0) return;
 
         const container = d3.select(menuContainerRef.current);
         container.selectAll('*').remove(); // Clear old menus
 
-        // SAMPLE OPTIONS
         const sampleOptions = [{ value: 'All', text: 'All' }]
             .concat(sampleNums.map(s => ({ value: s.toString(), text: `Sample ${s}` })));
 
-        // SAMPLE SELECTOR MENU
         container.append('div')
             .attr('class', 'menu-block')
             .call(
@@ -91,11 +87,9 @@ function ScatterPlotPage({ selectedMarkers }) {
             .on('change', (event, d) => {
                 const checked = event.target.checked;
                 if (checked) {
-                    // Allow up to 10 frequencies selected
                     if (selectedFrequencies.length < 10) {
                         setSelectedFrequencies(prev => [...prev, d]);
                     } else {
-                        // Uncheck the box if limit reached
                         event.target.checked = false;
                         alert('You can select a maximum of 10 frequencies.');
                     }
@@ -116,7 +110,6 @@ function ScatterPlotPage({ selectedMarkers }) {
     useEffect(() => {
         if (data.length === 0 || frequencyFields.length === 0) return;
         if (selectedFrequencies.length === 0) {
-            // No frequencies selected, just clear the chart or show a message
             const svg = d3.select(svgRef.current);
             svg.selectAll('*').remove();
             const width = 800;
@@ -145,17 +138,13 @@ function ScatterPlotPage({ selectedMarkers }) {
         let displayData = data;
         if (selectedSampleOption !== 'All') {
             const selectedNum = parseInt(selectedSampleOption, 10);
-            // Filter using Sample_num (from the samples collection)
             displayData = data.filter(d => d.Sample_num === selectedNum);
         }
 
-        // Create a mapping from `sample_num` (markers) to `ground_truth_label`
-        // We'll normalize to string keys
         const classMapping = Object.fromEntries(
             selectedMarkers.map(marker => [String(marker.sample_num), marker.groundTruthLabel])
         );
 
-        // Prepare marks for each selected frequency
         const marks = [];
         displayData.forEach(d => {
             const yVal = classMapping[String(d.Sample_num)] || 'Unknown';
@@ -168,7 +157,6 @@ function ScatterPlotPage({ selectedMarkers }) {
         });
 
         if (marks.length === 0) {
-            // If no valid marks, show a message
             svg.append('text')
                 .attr('x', width / 2)
                 .attr('y', height / 2)

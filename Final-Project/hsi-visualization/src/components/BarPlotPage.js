@@ -1,4 +1,3 @@
-// BarPlotPage.js
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import '../styles/BarPlotPage.css';
@@ -59,12 +58,11 @@ function BarPlotPage({ selectedMarkers }) {
 
             const freqs = frequencyFields.map(f => sample[f]).filter(v => typeof v === 'number');
 
-            // Bin frequencies into smaller bins of size 0.2
             const xDomain = [-0.5, 0.5];
-            const binSize = 0.05; // New smaller bin size
+            const binSize = 0.05; 
             const histogram = d3.histogram()
                 .domain(xDomain)
-                .thresholds(d3.range(-0.5, 0.51, binSize)); // Smaller bins
+                .thresholds(d3.range(-0.5, 0.51, binSize)); 
             const bins = histogram(freqs);
 
             // Convert bins to data for the bar chart

@@ -17,21 +17,14 @@ export const scatterPlot = () => {
     let yType; // 'categorical' or 'quantitative'
     let margin;
     let radius;
-    let selectedFrequencies; // array of selected frequency fields
+    let selectedFrequencies;
 
     const my = (selection) => {
         const t = transition().duration(1000);
-
-        // Data is an array of marks: {x, y, freq}
-        // y is categorical (e.g., groundTruthLabel)
-        // x is quantitative (frequency values)
-        // freq is the frequency field name
-
         const yValues = [...new Set(data.map(d => d.y))];
 
         let xDomain = extent(data.map(d => d.x));
         if (xDomain[0] === xDomain[1]) {
-            // In case all x are the same, expand domain slightly
             xDomain = [xDomain[0] - 1, xDomain[1] + 1];
         }
 
