@@ -33,6 +33,13 @@ const predictionSchema = new mongoose.Schema({
 
 const Prediction = mongoose.model('Prediction', predictionSchema);
 
+const sampleSchema = new mongoose.Schema({
+    Sample_num: Number,
+    // ... all the frq fields
+}, { collection: 'samples' });
+
+const Sample = mongoose.model('Sample', sampleSchema);
+
 // Updated /api/polygons route
 app.get('/api/polygons', async (req, res) => {
     try {
@@ -66,12 +73,35 @@ app.get('/api/polygons', async (req, res) => {
 });
 
 app.get('/api/samples', async (req, res) => {
-    res.json([]);
+    const sampleNums = req.query.sample_nums ? req.query.sample_nums.split(',').map(n => parseInt(n)) : [];
+    if (!sampleNums.length) {
+        return res.json([]);
+    }
+
+    const docs = await Sample.find({ Sample_num: { $in: sampleNums } }).lean();
+    res.json(docs);
 });
 
-app.get('/api/categories', async (req, res) => {
-    res.json([]);
+app.get('/api/samples', async (req, res) => {
+    const sampleNums = req.query.sample_nums ? req.query.sample_nums.split(',').map(n => parseInt(n)) : [];
+    if (!sampleNums.length) {
+        return res.json([]);
+    }
+
+    const docs = await Sample.find({ Sample_num: { $in: sampleNums } }).lean();
+    res.json(docs);
 });
+
+app.get('/api/predictions', async (req, res) => {
+    try {
+        const predictions = await Prediction.find({});
+        res.json(predictions);
+    } catch (error) {
+        console.error("Error fetching predictions:", error);
+        res.status(500).send('Server error fetching predictions');
+    }
+});
+
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

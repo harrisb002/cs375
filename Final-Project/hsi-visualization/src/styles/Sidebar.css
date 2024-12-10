@@ -7,6 +7,7 @@
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
     position: relative;
+    margin-top: 10px;
     /* Relative positioning */
 }
 
@@ -18,7 +19,7 @@
 
 .sidebar ul {
     list-style: none;
-    padding: 0;
+    padding-bottom: 25px;
 }
 
 .sidebar li {
@@ -48,4 +49,23 @@
     border: 2px solid rgba(0, 0, 0, 0.5);
     /* Semi-transparent black border */
     font-weight: bold;
+}
+
+.sidebar h3 {
+    width: auto;
+    /* Allow width to adjust based on content */
+    background-color: #268a9cd9;
+    /* Semi-transparent background */
+    color: rgb(255, 255, 255);
+    padding: 5px 10px;
+
+    /* Padding for box-like appearance */
+    border-radius: 8px;
+    /* Rounded corners for a modern look */
+    box-shadow: 0 6px 10px rgba(35, 114, 25, 0.6);
+    /* Ensure it stays above the map and other elements */
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    /* Adjust font size */
+    text-align: center;
 }

@@ -1,19 +1,19 @@
 .top-bar {
     position: fixed;
-    bottom: 10px;
+    top: 10px;
     /* Position at the bottom with slight offset */
-    left: 10px;
+    left: 4px;
     /* Align to the left with slight offset */
     width: auto;
     /* Allow width to adjust based on content */
-    background-color: rgba(52, 58, 64, 0.85);
+    background-color: #c0f1fad9;
     /* Semi-transparent background */
-    color: white;
-    padding: 10px 20px;
+    color: rgb(0, 0, 0);
+    padding: 5px 10px;
     /* Padding for box-like appearance */
     border-radius: 8px;
     /* Rounded corners for a modern look */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 10px rgba(35, 114, 25, 0.6);
     /* Subtle shadow for depth */
     z-index: 1000;
     /* Ensure it stays above the map and other elements */
@@ -27,7 +27,7 @@
 .top-bar h1 {
     margin: 0;
     font-size: 16px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+    font-weight: 900;
+    letter-spacing: 0.7px;
     text-align: center;
 }

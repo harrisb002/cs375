@@ -1,3 +1,4 @@
+// MapContainer.js
 import React, { useEffect, useState } from 'react';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 
@@ -30,9 +31,15 @@ const calculateCentroid = (coordinates) => {
     };
 };
 
-export default function MapContainer({ selectedCategory }) {
+export default function MapContainer({
+    selectedCategory,
+    selectedScatterMarkers,
+    setSelectedScatterMarkers,
+    selectedBarMarkers,
+    setSelectedBarMarkers,
+}) {
     const [markers, setMarkers] = useState([]);
-    const [selectedMarker, setSelectedMarker] = useState(null);
+    const [selectedMarkerInfo, setSelectedMarkerInfo] = useState(null);
 
     useEffect(() => {
         const fetchPolygons = async () => {
@@ -41,10 +48,16 @@ export default function MapContainer({ selectedCategory }) {
                 if (!response.ok) throw new Error('Failed to fetch polygons');
                 const data = await response.json();
 
-                const centroids = data.map(polygon => ({
+                const validPolygons = data.filter(
+                    (polygon) =>
+                        polygon.ground_truth_label && polygon.predicted_label_name
+                );
+
+                const centroids = validPolygons.map((polygon) => ({
+                    sample_num: polygon.sample_num,
                     position: calculateCentroid(polygon.coordinates),
                     groundTruthLabel: polygon.ground_truth_label,
-                    predictedLabel: polygon.predicted_label_name
+                    predictedLabel: polygon.predicted_label_name,
                 }));
 
                 setMarkers(centroids);
@@ -57,34 +70,82 @@ export default function MapContainer({ selectedCategory }) {
     }, []);
 
     const filteredMarkers = selectedCategory
-        ? markers.filter(marker => marker.groundTruthLabel === selectedCategory)
+        ? markers.filter((marker) => marker.groundTruthLabel === selectedCategory)
         : markers;
+
+    const addToScatterList = (marker) => {
+        if (!selectedScatterMarkers.some((m) => m.sample_num === marker.sample_num)) {
+            setSelectedScatterMarkers([...selectedScatterMarkers, marker]);
+        }
+    };
+
+    const addToBarList = (marker) => {
+        if (!selectedBarMarkers.some((m) => m.sample_num === marker.sample_num)) {
+            setSelectedBarMarkers([...selectedBarMarkers, marker]);
+        }
+    };
 
     return (
         <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''}>
             <GoogleMap mapContainerStyle={containerStyle} center={defaultCenter} zoom={12}>
                 {filteredMarkers.map((marker, index) => {
-                    const icon = marker.groundTruthLabel === marker.predictedLabel ? greenIcon : redIcon;
+                    const icon =
+                        marker.groundTruthLabel === marker.predictedLabel
+                            ? greenIcon
+                            : redIcon;
                     return (
                         <Marker
                             key={index}
                             position={marker.position}
                             icon={icon}
-                            onClick={() => setSelectedMarker(marker)}
+                            onClick={() => setSelectedMarkerInfo(marker)}
                         />
                     );
                 })}
 
-                {selectedMarker && (
+                {selectedMarkerInfo && (
                     <InfoWindow
-                        position={selectedMarker.position}
-                        onCloseClick={() => setSelectedMarker(null)}
+                        position={selectedMarkerInfo.position}
+                        onCloseClick={() => setSelectedMarkerInfo(null)}
                     >
                         <div>
+                            <h3>Sample Number</h3>
+                            <p>{selectedMarkerInfo.sample_num}</p>
                             <h3>Ground Truth Label</h3>
-                            <p>{selectedMarker.groundTruthLabel}</p>
+                            <p>{selectedMarkerInfo.groundTruthLabel}</p>
                             <h3>Predicted Label</h3>
-                            <p>{selectedMarker.predictedLabel}</p>
+                            <p>{selectedMarkerInfo.predictedLabel}</p>
+
+                            <button
+                                onClick={() => addToScatterList(selectedMarkerInfo)}
+                                style={{
+                                    marginTop: '10px',
+                                    padding: '5px 10px',
+                                    backgroundColor: 'blue',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    marginRight: '10px',
+                                }}
+                            >
+                                Add to Scatter Plot
+                            </button>
+
+                            <button
+                                onClick={() => addToBarList(selectedMarkerInfo)}
+                                style={{
+                                    marginTop: '10px',
+                                    padding: '5px 10px',
+                                    backgroundColor: 'purple',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Add to Bar Plot
+                            </button>
                         </div>
                     </InfoWindow>
                 )}
