@@ -11,6 +11,9 @@ const defaultCenter = {
     lng: 18.4241,
 };
 
+const greenIcon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
+const redIcon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+
 const calculateCentroid = (coordinates) => {
     let centroidLat = 0;
     let centroidLng = 0;
@@ -38,13 +41,11 @@ export default function MapContainer({ selectedCategory }) {
                 if (!response.ok) throw new Error('Failed to fetch polygons');
                 const data = await response.json();
 
-                const centroids = data.map(polygon => {
-                    return {
-                        position: calculateCentroid(polygon.coordinates),
-                        groundTruthLabel: polygon.ground_truth_label,
-                        predictedLabel: polygon.predicted_label_name
-                    };
-                });
+                const centroids = data.map(polygon => ({
+                    position: calculateCentroid(polygon.coordinates),
+                    groundTruthLabel: polygon.ground_truth_label,
+                    predictedLabel: polygon.predicted_label_name
+                }));
 
                 setMarkers(centroids);
             } catch (error) {
@@ -62,13 +63,17 @@ export default function MapContainer({ selectedCategory }) {
     return (
         <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''}>
             <GoogleMap mapContainerStyle={containerStyle} center={defaultCenter} zoom={12}>
-                {filteredMarkers.map((marker, index) => (
-                    <Marker
-                        key={index}
-                        position={marker.position}
-                        onClick={() => setSelectedMarker(marker)}
-                    />
-                ))}
+                {filteredMarkers.map((marker, index) => {
+                    const icon = marker.groundTruthLabel === marker.predictedLabel ? greenIcon : redIcon;
+                    return (
+                        <Marker
+                            key={index}
+                            position={marker.position}
+                            icon={icon}
+                            onClick={() => setSelectedMarker(marker)}
+                        />
+                    );
+                })}
 
                 {selectedMarker && (
                     <InfoWindow
