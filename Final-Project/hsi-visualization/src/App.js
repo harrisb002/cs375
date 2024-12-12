@@ -1,14 +1,25 @@
+/**
+ * App.js
+ * 
+ * Sets up routing, global states, and top-level components.
+ * Manages global states such as selected categories and marker selections.
+ */
+
 import React, { useState, useEffect } from 'react';
-import MapContainer from './components/MapContainer';
-import { Sidebar } from './components/Sidebar';
-import { TopBar } from './components/TopBar';
-import './styles/App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import ScatterPlotPage from './components/ScatterPlotPage';
-import BarPlotPage from './components/BarPlotPage';
-import HexCartoPage from './components/HexCartoPage';
+
+import { Sidebar } from './components/layout/Sidebar';
+import { TopBar } from './components/layout/TopBar';
+
+import MapContainer from './components/maps/MapContainer';
+import ScatterPlotPage from './components/plots/ScatterPlotPage';
+import BarPlotPage from './components/plots/BarPlotPage';
+import HexCartoPage from './components/plots/HexCartoPage';
+
+import './styles/App.css';
 
 function App() {
+  // Global states: categories for filtering, selected markers for plots, and hex layer toggle
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedScatterMarkers, setSelectedScatterMarkers] = useState([]);
@@ -16,6 +27,7 @@ function App() {
   const [showHexLayer, setShowHexLayer] = useState(false);
 
   useEffect(() => {
+    // Predefined categories. In future, could be fetched from the server but im lazy i guess
     const categoryList = [
       "Built-up",
       "Consolidated Barren",

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import '../styles/BarPlotPage.css';
+import '../../styles/BarPlotPage.css';
 
 function BarPlotPage({ selectedMarkers }) {
     const [samplesData, setSamplesData] = useState([]);
@@ -12,13 +12,13 @@ function BarPlotPage({ selectedMarkers }) {
     useEffect(() => {
         const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
-        // Fetch predictions
+        // Get the predictions
         fetch(`${backendUrl}/api/predictions`)
             .then(res => res.json())
             .then(preds => setPredictionsData(preds))
             .catch(err => console.error('Error fetching predictions:', err));
 
-        // Fetch samples
+        // Get the  samples
         const url = sampleNums.length > 0
             ? `${backendUrl}/api/samples?sample_nums=${sampleNums.join(',')}`
             : `${backendUrl}/api/samples`;
