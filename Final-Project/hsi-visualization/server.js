@@ -12,8 +12,8 @@ mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
-    console.log("MongoDB Connected");
-}).catch(err => console.error("MongoDB connection error:", err));
+    console.log("[server.js] MongoDB Connected");
+}).catch(err => console.error("[server.js] MongoDB connection error:", err));
 
 const polygonSchema = new mongoose.Schema({
     sample_num: Number,
@@ -43,11 +43,12 @@ const Sample = mongoose.model('Sample', sampleSchema);
 // Updated /api/polygons route
 app.get('/api/polygons', async (req, res) => {
     try {
+        console.log("[/api/polygons] Fetching polygons");
         const polygons = await Polygon.find({});
         const sampleNums = polygons.map(p => p.sample_num);
         const predictions = await Prediction.find({ sample_num: { $in: sampleNums } });
 
-        // Create a map from sample_num to prediction object for quick lookup
+        // Create a map from sample_num to prediction object
         const predictionMap = predictions.reduce((acc, pred) => {
             acc[pred.sample_num] = pred;
             return acc;
@@ -65,43 +66,50 @@ app.get('/api/polygons', async (req, res) => {
             };
         });
 
+        console.log("[/api/polygons] Returning polygonsWithPredictions length:", polygonsWithPredictions.length);
         res.json(polygonsWithPredictions);
     } catch (error) {
-        console.error("Error fetching polygons with predictions:", error);
+        console.error("[/api/polygons] Error fetching polygons with predictions:", error);
         res.status(500).send('Server error fetching polygons with predictions');
     }
 });
 
 app.get('/api/samples', async (req, res) => {
-    const sampleNums = req.query.sample_nums ? req.query.sample_nums.split(',').map(n => parseInt(n)) : [];
-    if (!sampleNums.length) {
-        return res.json([]);
-    }
+    try {
+        const sampleNums = req.query.sample_nums ? req.query.sample_nums.split(',').map(n => parseInt(n)) : [];
+        const limit = parseInt(req.query.limit) || 1000;    // default to 1000
+        const skip = parseInt(req.query.skip) || 0;
 
-    const docs = await Sample.find({ Sample_num: { $in: sampleNums } }).lean();
-    res.json(docs);
+        console.log("[/api/samples] Requested sample_nums:", sampleNums);
+
+        let docs;
+        if (!sampleNums.length) {
+            // If no sample_nums specified, return a limited set
+            docs = await Sample.find({}).limit(limit).skip(skip).lean();
+        } else {
+            docs = await Sample.find({ Sample_num: { $in: sampleNums } }).lean();
+        }
+
+        console.log("[/api/samples] Samples returned:", docs.length);
+        res.json(docs);
+    } catch (error) {
+        console.error("[/api/samples] Error fetching samples:", error);
+        res.status(500).send('Server error fetching samples');
+    }
 });
 
-app.get('/api/samples', async (req, res) => {
-    const sampleNums = req.query.sample_nums ? req.query.sample_nums.split(',').map(n => parseInt(n)) : [];
-    if (!sampleNums.length) {
-        return res.json([]);
-    }
-
-    const docs = await Sample.find({ Sample_num: { $in: sampleNums } }).lean();
-    res.json(docs);
-});
 
 app.get('/api/predictions', async (req, res) => {
     try {
+        console.log("[/api/predictions] Fetching predictions");
         const predictions = await Prediction.find({});
+        console.log("[/api/predictions] Predictions returned:", predictions.length);
         res.json(predictions);
     } catch (error) {
-        console.error("Error fetching predictions:", error);
+        console.error("[/api/predictions] Error fetching predictions:", error);
         res.status(500).send('Server error fetching predictions');
     }
 });
 
-
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`[server.js] Server running on port ${PORT}`));

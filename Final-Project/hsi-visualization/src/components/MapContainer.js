@@ -58,7 +58,7 @@ export default function MapContainer({
                 if (!polygonsRes.ok) throw new Error('Failed to fetch polygons');
                 const polygons = await polygonsRes.json();
 
-                // Fetch samples (all samples, since no query param is given)
+                // Fetch all samples
                 const samplesRes = await fetch(`${backendUrl}/api/samples`);
                 if (!samplesRes.ok) throw new Error('Failed to fetch samples');
                 const samples = await samplesRes.json();
@@ -74,7 +74,7 @@ export default function MapContainer({
                     (polygon) => polygon.ground_truth_label && polygon.predicted_label_name
                 );
 
-                // Prepare markers (for the normal marker view)
+                // Prepare markers for normal view
                 const centroids = validPolygons.map((polygon) => ({
                     sample_num: polygon.sample_num,
                     position: calculateCentroid(polygon.coordinates),
@@ -83,15 +83,14 @@ export default function MapContainer({
                 }));
                 setMarkers(centroids);
 
-                // Prepare data for the hex layer
-                // We'll aggregate ALL frequency fields (frq0, frq1, ..., frq###) for each sample
+                // Prepare data for hex layer
                 const hexPoints = validPolygons.map((polygon) => {
                     const centroid = calculateCentroid(polygon.coordinates);
                     const sample = sampleMap[polygon.sample_num];
 
                     let frequencyValue = 0;
                     if (sample) {
-                        // Sum all frequency fields that start with 'frq'
+                        // Sum all frequency fields (frq0, frq1, ...)
                         frequencyValue = Object.keys(sample)
                             .filter(key => key.startsWith('frq'))
                             .reduce((acc, key) => acc + sample[key], 0);
@@ -130,15 +129,15 @@ export default function MapContainer({
 
     const onMapLoad = useCallback((map) => {
         mapRef.current = map;
-        // Switch to a map type that supports tilt
+        // Use satellite for better 3D perspective
         map.setMapTypeId('satellite');
 
-        // Attempting a tilt view (note: tilt is view/zoom dependent)
+        // Attempt to enable tilt (3D view)
         map.addListener('tilesloaded', () => {
             map.setTilt(45);
         });
 
-        // If hex layer is shown at load
+        // If hex layer is shown at load and we have data
         if (showHexLayer && hexData.length > 0) {
             const overlay = createHexOverlay(map, hexData);
             overlayRef.current = overlay;
@@ -152,6 +151,7 @@ export default function MapContainer({
             const overlay = createHexOverlay(mapRef.current, hexData);
             overlayRef.current = overlay;
         } else {
+            // Hide hex layer
             if (overlayRef.current) {
                 overlayRef.current.setMap(null);
                 overlayRef.current = null;
@@ -164,13 +164,14 @@ export default function MapContainer({
             id: 'hexagon-layer',
             data,
             extruded: true,
+            elevationScale: 200,
             pickable: true,
             radius: 500,
             coverage: 1,
-            // Aggregate frequency of all points in the hex cell
+            upperPercentile: 100,
+            // Aggregate frequencies to determine elevation and color
             getElevationValue: (points) => points.reduce((acc, p) => acc + p.frequency, 0),
             getColorValue: (points) => points.reduce((acc, p) => acc + p.frequency, 0),
-            elevationScale: 200,
             colorRange: [
                 [1, 152, 189],
                 [73, 227, 206],

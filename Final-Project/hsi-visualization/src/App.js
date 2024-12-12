@@ -3,7 +3,7 @@ import MapContainer from './components/MapContainer';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import './styles/App.css';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ScatterPlotPage from './components/ScatterPlotPage';
 import BarPlotPage from './components/BarPlotPage';
 import HexCartoPage from './components/HexCartoPage';
