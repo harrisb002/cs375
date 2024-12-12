@@ -1,4 +1,3 @@
-// Sidebar.js
 import React from 'react';
 import '../styles/Sidebar.css';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -131,6 +130,12 @@ export function Sidebar({
                     style={{ fontSize: '20px' }}
                 >
                     🏠
+                </button>
+                <button
+                    onClick={() => (window.location.href = '/hex-carto')}
+                    style={{ fontSize: '20px', margin: '10px' }}
+                >
+                    🌎
                 </button>
             </div>
         </div>

@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from 'react';
+// MapContainer.js
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMapsOverlay } from '@deck.gl/google-maps';
+import { HexagonLayer } from '@deck.gl/aggregation-layers';
 
 const containerStyle = {
     width: '100%',
@@ -36,36 +39,77 @@ export default function MapContainer({
     setSelectedScatterMarkers,
     selectedBarMarkers,
     setSelectedBarMarkers,
+    showHexLayer,
+    setShowHexLayer
 }) {
     const [markers, setMarkers] = useState([]);
     const [selectedMarkerInfo, setSelectedMarkerInfo] = useState(null);
+    const [hexData, setHexData] = useState([]);
+    const mapRef = useRef(null);
+    const overlayRef = useRef(null);
 
     useEffect(() => {
-        const fetchPolygons = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/polygons`);
-                if (!response.ok) throw new Error('Failed to fetch polygons');
-                const data = await response.json();
+                const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
-                const validPolygons = data.filter(
-                    (polygon) =>
-                        polygon.ground_truth_label && polygon.predicted_label_name
+                // Fetch polygons
+                const polygonsRes = await fetch(`${backendUrl}/api/polygons`);
+                if (!polygonsRes.ok) throw new Error('Failed to fetch polygons');
+                const polygons = await polygonsRes.json();
+
+                // Fetch samples (all samples, since no query param is given)
+                const samplesRes = await fetch(`${backendUrl}/api/samples`);
+                if (!samplesRes.ok) throw new Error('Failed to fetch samples');
+                const samples = await samplesRes.json();
+
+                // Create a lookup for samples keyed by Sample_num
+                const sampleMap = samples.reduce((acc, s) => {
+                    acc[s.Sample_num] = s;
+                    return acc;
+                }, {});
+
+                // Filter polygons that have ground_truth_label and predicted_label_name
+                const validPolygons = polygons.filter(
+                    (polygon) => polygon.ground_truth_label && polygon.predicted_label_name
                 );
 
+                // Prepare markers (for the normal marker view)
                 const centroids = validPolygons.map((polygon) => ({
                     sample_num: polygon.sample_num,
                     position: calculateCentroid(polygon.coordinates),
                     groundTruthLabel: polygon.ground_truth_label,
                     predictedLabel: polygon.predicted_label_name,
                 }));
-
                 setMarkers(centroids);
+
+                // Prepare data for the hex layer
+                // We'll aggregate ALL frequency fields (frq0, frq1, ..., frq###) for each sample
+                const hexPoints = validPolygons.map((polygon) => {
+                    const centroid = calculateCentroid(polygon.coordinates);
+                    const sample = sampleMap[polygon.sample_num];
+
+                    let frequencyValue = 0;
+                    if (sample) {
+                        // Sum all frequency fields that start with 'frq'
+                        frequencyValue = Object.keys(sample)
+                            .filter(key => key.startsWith('frq'))
+                            .reduce((acc, key) => acc + sample[key], 0);
+                    }
+
+                    return {
+                        position: [centroid.lng, centroid.lat],
+                        frequency: frequencyValue
+                    };
+                });
+
+                setHexData(hexPoints);
             } catch (error) {
-                console.error('Error fetching polygons:', error);
+                console.error('Error fetching data:', error);
             }
         };
 
-        fetchPolygons();
+        fetchData();
     }, []);
 
     const filteredMarkers = selectedCategory
@@ -84,71 +128,151 @@ export default function MapContainer({
         }
     };
 
+    const onMapLoad = useCallback((map) => {
+        mapRef.current = map;
+        // Switch to a map type that supports tilt
+        map.setMapTypeId('satellite');
+
+        // Attempting a tilt view (note: tilt is view/zoom dependent)
+        map.addListener('tilesloaded', () => {
+            map.setTilt(45);
+        });
+
+        // If hex layer is shown at load
+        if (showHexLayer && hexData.length > 0) {
+            const overlay = createHexOverlay(map, hexData);
+            overlayRef.current = overlay;
+        }
+    }, [showHexLayer, hexData]);
+
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        if (showHexLayer && hexData.length > 0) {
+            const overlay = createHexOverlay(mapRef.current, hexData);
+            overlayRef.current = overlay;
+        } else {
+            if (overlayRef.current) {
+                overlayRef.current.setMap(null);
+                overlayRef.current = null;
+            }
+        }
+    }, [showHexLayer, hexData]);
+
+    function createHexOverlay(map, data) {
+        const hexLayer = new HexagonLayer({
+            id: 'hexagon-layer',
+            data,
+            extruded: true,
+            pickable: true,
+            radius: 500,
+            coverage: 1,
+            // Aggregate frequency of all points in the hex cell
+            getElevationValue: (points) => points.reduce((acc, p) => acc + p.frequency, 0),
+            getColorValue: (points) => points.reduce((acc, p) => acc + p.frequency, 0),
+            elevationScale: 200,
+            colorRange: [
+                [1, 152, 189],
+                [73, 227, 206],
+                [216, 254, 181],
+                [254, 237, 177],
+                [254, 173, 84],
+                [209, 55, 78]
+            ],
+            material: {
+                ambient: 0.64,
+                diffuse: 0.6,
+                shininess: 32,
+                specularColor: [51, 51, 51]
+            },
+            parameters: {
+                depthTest: true
+            },
+            getPosition: d => d.position,
+            getTooltip: ({ object }) => object &&
+                `Count: ${object.points.length}\nFreq Sum: ${object.elevationValue.toFixed(3)}`
+        });
+
+        const overlay = new GoogleMapsOverlay({
+            layers: [hexLayer]
+        });
+
+        overlay.setMap(map);
+        return overlay;
+    }
+
     return (
-        <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''}>
-            <GoogleMap mapContainerStyle={containerStyle} center={defaultCenter} zoom={12}>
-                {filteredMarkers.map((marker, index) => {
-                    const icon =
-                        marker.groundTruthLabel === marker.predictedLabel
-                            ? greenIcon
-                            : redIcon;
-                    return (
-                        <Marker
-                            key={index}
-                            position={marker.position}
-                            icon={icon}
-                            onClick={() => setSelectedMarkerInfo(marker)}
-                        />
-                    );
-                })}
+        <div style={{ position: 'relative' }}>
+            <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''}>
+                <GoogleMap
+                    mapContainerStyle={containerStyle}
+                    center={defaultCenter}
+                    zoom={12}
+                    onLoad={onMapLoad}
+                >
+                    {!showHexLayer && filteredMarkers.map((marker, index) => {
+                        const icon =
+                            marker.groundTruthLabel === marker.predictedLabel
+                                ? greenIcon
+                                : redIcon;
+                        return (
+                            <Marker
+                                key={index}
+                                position={marker.position}
+                                icon={icon}
+                                onClick={() => setSelectedMarkerInfo(marker)}
+                            />
+                        );
+                    })}
 
-                {selectedMarkerInfo && (
-                    <InfoWindow
-                        position={selectedMarkerInfo.position}
-                        onCloseClick={() => setSelectedMarkerInfo(null)}
-                    >
-                        <div>
-                            <h3>Sample Number</h3>
-                            <p>{selectedMarkerInfo.sample_num}</p>
-                            <h3>Ground Truth Label</h3>
-                            <p>{selectedMarkerInfo.groundTruthLabel}</p>
-                            <h3>Predicted Label</h3>
-                            <p>{selectedMarkerInfo.predictedLabel}</p>
+                    {selectedMarkerInfo && !showHexLayer && (
+                        <InfoWindow
+                            position={selectedMarkerInfo.position}
+                            onCloseClick={() => setSelectedMarkerInfo(null)}
+                        >
+                            <div>
+                                <h3>Sample Number</h3>
+                                <p>{selectedMarkerInfo.sample_num}</p>
+                                <h3>Ground Truth Label</h3>
+                                <p>{selectedMarkerInfo.groundTruthLabel}</p>
+                                <h3>Predicted Label</h3>
+                                <p>{selectedMarkerInfo.predictedLabel}</p>
 
-                            <button
-                                onClick={() => addToScatterList(selectedMarkerInfo)}
-                                style={{
-                                    marginTop: '10px',
-                                    padding: '5px 10px',
-                                    backgroundColor: 'blue',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    marginRight: '10px',
-                                }}
-                            >
-                                Add to Scatter Plot
-                            </button>
+                                <button
+                                    onClick={() => addToScatterList(selectedMarkerInfo)}
+                                    style={{
+                                        marginTop: '10px',
+                                        padding: '5px 10px',
+                                        backgroundColor: 'blue',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        marginRight: '10px',
+                                    }}
+                                >
+                                    Add to Scatter Plot
+                                </button>
 
-                            <button
-                                onClick={() => addToBarList(selectedMarkerInfo)}
-                                style={{
-                                    marginTop: '10px',
-                                    padding: '5px 10px',
-                                    backgroundColor: 'purple',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Add to Bar Plot
-                            </button>
-                        </div>
-                    </InfoWindow>
-                )}
-            </GoogleMap>
-        </LoadScript>
+                                <button
+                                    onClick={() => addToBarList(selectedMarkerInfo)}
+                                    style={{
+                                        marginTop: '10px',
+                                        padding: '5px 10px',
+                                        backgroundColor: 'purple',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Add to Bar Plot
+                                </button>
+                            </div>
+                        </InfoWindow>
+                    )}
+                </GoogleMap>
+            </LoadScript>
+        </div>
     );
 }
