@@ -8,10 +8,10 @@ and aggregated frequency data into a coherent visual interface, enabling researc
 to intuitively understand and analyze landscape patterns in the Greater Cape Floristic Region of South Africa.
 
 <div>
-  <a href="https://github.com/harrisb002/hsi_visualization">
+  <a href="https://github.com/harrisb002/cs375/Final-Project/hsi_visualization">
     <img src="assets/CapeRegion.png" alt="Logo" width="600" height="400">
   </a>
-  <a href="https://github.com/harrisb002/hsi_visualization">
+  <a href="https://github.com/harrisb002/cs375/Final-Project/hsi_visualization">
     <img src="assets/marker_map.png" alt="Logo" width="600" height="400">
   </a>
 </div>
@@ -24,17 +24,15 @@ This work aligns with the BioSCape research project—a collaboration between NA
 and associated institutions—focused on biodiversity mapping and ecological understanding in the Greater Cape Floristic Region.
 Leveraging high-fidelity hyperspectral data, this platform helps make complex spectral classification results accessible and actionable.
 
-<a href="https://github.com/harrisb002/hsi_visualization">
+<a href="https://github.com/harrisb002/cs375/Final-Project/hsi_visualization">
   <img src="assets/bioscape_logo.png" alt="BioSCape Logo" width="125" height="75">
 </a>
 
 ## Background
 
-The underlying ML model and classification process are described in more detail in the
-[Hyperspectral-Landcover-Classification](https://github.com/harrisb002/Hyperspectral-Landcover-Classification) repository.
 Using AVIRIS-NG hyperspectral images (432 spectral bands), a range of land cover types have been classified, including:
 
-<a href="https://github.com/harrisb002/hsi_visualization">
+<a href="https://github.com/harrisb002/cs375/Final-Project/hsi_visualization">
   <img src="assets/HyperSpectral_cub.png" alt="BioSCape Logo" width="200" height="100">
 </a>
 
@@ -63,7 +61,7 @@ The platform uses the Google Maps API for an intuitive spatial interface:
   correctly predicted labels (based on ground truth), while red markers indicate discrepancies.
 
   **Example (Marker Map with Predictions):**  
-  <a href="https://github.com/harrisb002/hsi_visualization">
+  <a href="https://github.com/harrisb002/cs375/Final-Project/hsi_visualization">
   <img src="assets/marker_map.png" alt="Logo" width="500" height="250">
   </a>
 
@@ -75,7 +73,7 @@ The platform uses the Google Maps API for an intuitive spatial interface:
   Clicking a marker displays detailed metadata: sample number, ground truth label, predicted label,
   and options to add the sample to further analytical plots (e.g., scatter or bar plots).
 
-  <a href="https://github.com/harrisb002/hsi_visualization">
+  <a href="https://github.com/harrisb002/cs375/Final-Project/hsi_visualization">
     <img src="assets/info_window.png" alt="Logo" width="600" height="400">
   </a>
 
@@ -101,7 +99,7 @@ For deeper dives into spectral distributions:
 - **Bar Plot:**  
   Users can select individual samples and generate histograms (bar plots) of frequency distributions.
 
-    <a href="https://github.com/harrisb002/hsi_visualization">
+    <a href="https://github.com/harrisb002/cs375/Final-Project/hsi_visualization">
     <img src="assets/sample_selected.png" alt="Logo" width="200" height="300">
   </a>
 
